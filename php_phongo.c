@@ -1381,10 +1381,8 @@ void php_phongo_cursor_to_zval(zval *retval, const mongoc_cursor_t *cursor) /* {
 		_ADD_BOOL(retval, is_command);
 		_ADD_BOOL(retval, sent);
 		_ADD_BOOL(retval, done);
-		_ADD_BOOL(retval, failed);
 		_ADD_BOOL(retval, end_of_event);
 		_ADD_BOOL(retval, in_exhaust);
-		_ADD_BOOL(retval, redir_primary);
 		_ADD_BOOL(retval, has_fields);
 #undef _ADD_BOOL
 
@@ -1544,6 +1542,7 @@ void php_phongo_populate_default_ssl_ctx(php_stream_context *ctx, zval *driverOp
 				str_efree(ctmp); \
 			} \
 			php_stream_context_set_option(ctx, "ssl", name, &ztmp); \
+			zval_ptr_dtor(&ztmp); \
 		}
 #define SET_BOOL_CTX(name, defaultvalue) \
 		{ \
@@ -1884,7 +1883,8 @@ static mongoc_client_t *php_phongo_make_mongo_client(const mongoc_uri_t *uri, zv
 			char filename[MAXPATHLEN];
 
 #if PHP_VERSION_ID >= 70000
-			if (VCWD_REALPATH(zval_get_string(pem)->val, filename)) {
+			zend_string *s = zval_get_string(pem);
+			if (VCWD_REALPATH(ZSTR_VAL(s), filename)) {
 #else
 			convert_to_string_ex(pem);
 			if (VCWD_REALPATH(Z_STRVAL_PP(pem), filename)) {
@@ -1894,6 +1894,9 @@ static mongoc_client_t *php_phongo_make_mongo_client(const mongoc_uri_t *uri, zv
 				ssl_options.pem_file = filename;
 				mongoc_client_set_ssl_opts(client, &ssl_options);
 			}
+#if PHP_VERSION_ID >= 70000
+			zend_string_release(s);
+#endif
 		}
 	}
 

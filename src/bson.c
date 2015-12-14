@@ -1081,9 +1081,9 @@ static bool is_public_property(zend_class_entry *ce, const char *prop_name, int 
 	
 	return (property_info->flags & ZEND_ACC_PUBLIC);
 #else
-	zval member;
 	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
 	property_info = zend_get_property_info(ce, &member, 1 TSRMLS_CC);
+#endif
 
 	return (property_info && (property_info->flags & ZEND_ACC_PUBLIC));
 #endif

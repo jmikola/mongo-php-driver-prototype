@@ -137,6 +137,7 @@ PHP_METHOD(Server, getHost)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 	intern = Z_SERVER_OBJ_P(getThis());
@@ -145,11 +146,11 @@ PHP_METHOD(Server, getHost)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		PHONGO_RETURN_STRING(sd->host.host);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto array Server::getTags()
@@ -158,6 +159,7 @@ PHP_METHOD(Server, getTags)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -168,7 +170,7 @@ PHP_METHOD(Server, getTags)
 	}
 
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		php_phongo_bson_state  state = PHONGO_BSON_STATE_INITIALIZER;
 		state.map.root_type = PHONGO_TYPEMAP_NATIVE_ARRAY;
 		state.map.document_type = PHONGO_TYPEMAP_NATIVE_ARRAY;
@@ -181,7 +183,7 @@ PHP_METHOD(Server, getTags)
 #endif
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto array Server::getInfo()
@@ -190,6 +192,7 @@ PHP_METHOD(Server, getInfo)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -200,7 +203,7 @@ PHP_METHOD(Server, getInfo)
 	}
 
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		php_phongo_bson_state  state = PHONGO_BSON_STATE_INITIALIZER;
 		state.map.root_type = PHONGO_TYPEMAP_NATIVE_ARRAY;
 		state.map.document_type = PHONGO_TYPEMAP_NATIVE_ARRAY;
@@ -214,7 +217,7 @@ PHP_METHOD(Server, getInfo)
 #endif
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto integer Server::getLatency()
@@ -223,6 +226,7 @@ PHP_METHOD(Server, getLatency)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -232,11 +236,11 @@ PHP_METHOD(Server, getLatency)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_LONG(sd->round_trip_time);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto integer Server::getPort()
@@ -245,6 +249,7 @@ PHP_METHOD(Server, getPort)
 {
 	php_phongo_server_t         *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -254,11 +259,11 @@ PHP_METHOD(Server, getPort)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_LONG(sd->host.port);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto integer Server::getType()
@@ -267,6 +272,7 @@ PHP_METHOD(Server, getType)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -276,11 +282,11 @@ PHP_METHOD(Server, getType)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_LONG(sd->type);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto bool Server::isPrimary()
@@ -289,6 +295,7 @@ PHP_METHOD(Server, isPrimary)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -298,11 +305,11 @@ PHP_METHOD(Server, isPrimary)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_BOOL(sd->type == MONGOC_SERVER_RS_PRIMARY);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto bool Server::isSecondary()
@@ -311,6 +318,7 @@ PHP_METHOD(Server, isSecondary)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -320,11 +328,11 @@ PHP_METHOD(Server, isSecondary)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_BOOL(sd->type == MONGOC_SERVER_RS_SECONDARY);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto bool Server::isArbiter()
@@ -333,6 +341,7 @@ PHP_METHOD(Server, isArbiter)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -342,11 +351,11 @@ PHP_METHOD(Server, isArbiter)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		RETURN_BOOL(sd->type == MONGOC_SERVER_RS_ARBITER);
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto bool Server::isHidden()
@@ -355,6 +364,7 @@ PHP_METHOD(Server, isHidden)
 {
 	php_phongo_server_t      *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -364,13 +374,13 @@ PHP_METHOD(Server, isHidden)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		bson_iter_t iter;
 
 		RETURN_BOOL(bson_iter_init_find_case(&iter, &sd->last_is_master, "hidden") && bson_iter_as_bool(&iter));
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 /* {{{ proto bool Server::isPassive()
@@ -379,6 +389,7 @@ PHP_METHOD(Server, isPassive)
 {
 	php_phongo_server_t         *intern;
 	mongoc_server_description_t *sd;
+	bson_error_t                 error;
 	SUPPRESS_UNUSED_WARNING(return_value_ptr) SUPPRESS_UNUSED_WARNING(return_value_used)
 
 
@@ -388,13 +399,13 @@ PHP_METHOD(Server, isPassive)
 		return;
 	}
 
-	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
+	if ((sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
 		bson_iter_t iter;
 
 		RETURN_BOOL(bson_iter_init_find_case(&iter, &sd->last_is_master, "passive") && bson_iter_as_bool(&iter));
 	}
 
-	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 }
 /* }}} */
 
@@ -480,16 +491,24 @@ static int php_phongo_server_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{
 {
     php_phongo_server_t *intern1;
     php_phongo_server_t *intern2;
+	bson_error_t error1;
+	bson_error_t error2;
 	mongoc_server_description_t *sd1, *sd2;
 
     intern1 = Z_SERVER_OBJ_P(o1);
     intern2 = Z_SERVER_OBJ_P(o2);
 
-	sd1 = mongoc_topology_description_server_by_id(&intern1->client->topology->description, intern1->server_id);
-	sd2 = mongoc_topology_description_server_by_id(&intern2->client->topology->description, intern2->server_id);
+	sd1 = mongoc_topology_description_server_by_id(&intern1->client->topology->description, intern1->server_id, &error1);
+	sd2 = mongoc_topology_description_server_by_id(&intern2->client->topology->description, intern2->server_id, &error2);
 
 	if (!sd1 || !sd2) {
-		phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+		if (!sd1 && !sd2) {
+			phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server descriptions: %s and %s", error1.message, error2.message);
+		} else if (!sd1) {
+			phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error1.message);
+		} else {
+			phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error2.message);
+		}
 		return 0;
 	}
 
@@ -541,14 +560,14 @@ HashTable *php_phongo_server_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 	zval                         retval = zval_used_for_init;
 #endif
 	mongoc_server_description_t *sd;
-
+	bson_error_t                 error;
 
 	*is_temp = 1;
 	intern = Z_SERVER_OBJ_P(object);
 
 
-	if (!(sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id))) {
-		phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "%s", "Failed to get server description, server likely gone");
+	if (!(sd = mongoc_topology_description_server_by_id(&intern->client->topology->description, intern->server_id, &error))) {
+		phongo_throw_exception(PHONGO_ERROR_RUNTIME TSRMLS_CC, "Failed to get server description: %s", error.message);
 		return NULL;
 	}
 

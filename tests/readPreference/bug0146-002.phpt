@@ -1,7 +1,7 @@
 --TEST--
-PHPC-146: ReadPreference primaryPreferred and secondary swapped
+PHPC-146: ReadPreference primaryPreferred and secondary swapped (find command)
 --SKIPIF--
-<?php require __DIR__ . "/../utils/basic-skipif.inc"?>
+<?php require __DIR__ . "/../utils/basic-skipif.inc"; ?>
 --FILE--
 <?php
 require_once __DIR__ . "/../utils/basic.inc";
@@ -32,7 +32,7 @@ foreach($rps as $r) {
 --EXPECTF--
 object(MongoDB\Driver\Cursor)#%d (%d) {
   ["cursor"]=>
-  array(18) {
+  array(%d) {
     ["stamp"]=>
     int(0)
     ["is_command"]=>
@@ -40,20 +40,18 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
     ["sent"]=>
     bool(true)
     ["done"]=>
-    bool(true)
-    ["failed"]=>
     bool(false)
     ["end_of_event"]=>
-    bool(true)
-    ["in_exhaust"]=>
     bool(false)
-    ["redir_primary"]=>
+    ["in_exhaust"]=>
     bool(false)
     ["has_fields"]=>
     bool(false)
     ["query"]=>
-    object(stdClass)#%d (1) {
-      ["$query"]=>
+    object(stdClass)#%d (%d) {
+      ["find"]=>
+      string(%d) "%s"
+      ["filter"]=>
       object(stdClass)#%d (%d) {
         ["my"]=>
         string(5) "query"
@@ -88,7 +86,7 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
 }
 object(MongoDB\Driver\Cursor)#%d (%d) {
   ["cursor"]=>
-  array(18) {
+  array(%d) {
     ["stamp"]=>
     int(0)
     ["is_command"]=>
@@ -96,20 +94,18 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
     ["sent"]=>
     bool(true)
     ["done"]=>
-    bool(true)
-    ["failed"]=>
     bool(false)
     ["end_of_event"]=>
-    bool(true)
-    ["in_exhaust"]=>
     bool(false)
-    ["redir_primary"]=>
+    ["in_exhaust"]=>
     bool(false)
     ["has_fields"]=>
     bool(false)
     ["query"]=>
     object(stdClass)#%d (%d) {
-      ["$query"]=>
+      ["find"]=>
+      string(%d) "%s"
+      ["filter"]=>
       object(stdClass)#%d (%d) {
         ["my"]=>
         string(5) "query"
@@ -144,7 +140,7 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
 }
 object(MongoDB\Driver\Cursor)#%d (%d) {
   ["cursor"]=>
-  array(18) {
+  array(%d) {
     ["stamp"]=>
     int(0)
     ["is_command"]=>
@@ -152,20 +148,18 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
     ["sent"]=>
     bool(true)
     ["done"]=>
-    bool(true)
-    ["failed"]=>
     bool(false)
     ["end_of_event"]=>
-    bool(true)
-    ["in_exhaust"]=>
     bool(false)
-    ["redir_primary"]=>
+    ["in_exhaust"]=>
     bool(false)
     ["has_fields"]=>
     bool(false)
     ["query"]=>
     object(stdClass)#%d (%d) {
-      ["$query"]=>
+      ["find"]=>
+      string(%d) "%s"
+      ["filter"]=>
       object(stdClass)#%d (%d) {
         ["my"]=>
         string(5) "query"
@@ -200,7 +194,7 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
 }
 object(MongoDB\Driver\Cursor)#%d (%d) {
   ["cursor"]=>
-  array(18) {
+  array(%d) {
     ["stamp"]=>
     int(0)
     ["is_command"]=>
@@ -208,20 +202,18 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
     ["sent"]=>
     bool(true)
     ["done"]=>
-    bool(true)
-    ["failed"]=>
     bool(false)
     ["end_of_event"]=>
-    bool(true)
-    ["in_exhaust"]=>
     bool(false)
-    ["redir_primary"]=>
+    ["in_exhaust"]=>
     bool(false)
     ["has_fields"]=>
     bool(false)
     ["query"]=>
     object(stdClass)#%d (%d) {
-      ["$query"]=>
+      ["find"]=>
+      string(%d) "%s"
+      ["filter"]=>
       object(stdClass)#%d (%d) {
         ["my"]=>
         string(5) "query"
@@ -256,7 +248,7 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
 }
 object(MongoDB\Driver\Cursor)#%d (%d) {
   ["cursor"]=>
-  array(18) {
+  array(%d) {
     ["stamp"]=>
     int(0)
     ["is_command"]=>
@@ -264,20 +256,18 @@ object(MongoDB\Driver\Cursor)#%d (%d) {
     ["sent"]=>
     bool(true)
     ["done"]=>
-    bool(true)
-    ["failed"]=>
     bool(false)
     ["end_of_event"]=>
-    bool(true)
-    ["in_exhaust"]=>
     bool(false)
-    ["redir_primary"]=>
+    ["in_exhaust"]=>
     bool(false)
     ["has_fields"]=>
     bool(false)
     ["query"]=>
     object(stdClass)#%d (%d) {
-      ["$query"]=>
+      ["find"]=>
+      string(%d) "%s"
+      ["filter"]=>
       object(stdClass)#%d (%d) {
         ["my"]=>
         string(5) "query"

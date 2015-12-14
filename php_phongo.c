@@ -322,7 +322,6 @@ bool phongo_query_init(php_phongo_query_t *query, bson_t *filter, bson_t *option
 
 
 		if (bson_iter_init_find(&iter, options, "modifiers")) {
-			bson_t tmp;
 			uint32_t len = 0;
 			const uint8_t *data = NULL;
 
@@ -332,9 +331,13 @@ bool phongo_query_init(php_phongo_query_t *query, bson_t *filter, bson_t *option
 			}
 
 			bson_iter_document(&iter, &len, &data);
-			bson_init_static(&tmp, data, len);
-			bson_copy_to_excluding_noinit(&tmp, query->query, "nadastrada", NULL);
-			bson_destroy (&tmp);
+			if (len) {
+				bson_t tmp;
+
+				bson_init_static(&tmp, data, len);
+				bson_copy_to_excluding_noinit(&tmp, query->query, "not-used-value", NULL);
+				bson_destroy (&tmp);
+			}
 		}
 
 		if (bson_iter_init_find(&iter, options, "projection")) {
@@ -347,11 +350,12 @@ bool phongo_query_init(php_phongo_query_t *query, bson_t *filter, bson_t *option
 			}
 
 			bson_iter_document(&iter, &len, &data);
-			query->selector = bson_new_from_data(data, len);
+			if (len) {
+				query->selector = bson_new_from_data(data, len);
+			}
 		}
 
 		if (bson_iter_init_find(&iter, options, "sort")) {
-			bson_t tmp;
 			uint32_t len = 0;
 			const uint8_t *data = NULL;
 
@@ -361,9 +365,13 @@ bool phongo_query_init(php_phongo_query_t *query, bson_t *filter, bson_t *option
 			}
 
 			phongo_bson_iter_as_document(&iter, &len, &data);
-			bson_init_static(&tmp, data, len);
-			bson_append_document(query->query, "$orderby", -1, &tmp);
-			bson_destroy(&tmp);
+			if (len) {
+				bson_t tmp;
+
+				bson_init_static(&tmp, data, len);
+				bson_append_document(query->query, "$orderby", -1, &tmp);
+				bson_destroy(&tmp);
+			}
 		}
 	}
 
@@ -645,12 +653,14 @@ int phongo_execute_command(mongoc_client_t *client, const char *db, const bson_t
 	 * after the error checking above. */
 	if (bson_iter_init_find(&iter, doc, "cursor") && BSON_ITER_HOLDS_DOCUMENT(&iter) && bson_iter_recurse(&iter, &child)) {
 		mongoc_cursor_cursorid_t *cid;
+		bson_t empty = BSON_INITIALIZER;
 
-		_mongoc_cursor_cursorid_init(cursor);
+		_mongoc_cursor_cursorid_init(cursor, &empty);
 		cursor->limit = 0;
 
 		cid = cursor->iface_data;
-		cid->has_cursor = true;
+		cid->in_batch = true;
+		bson_destroy (&empty);
 
 		while (bson_iter_next(&child)) {
 			if (BSON_ITER_IS_KEY(&child, "id")) {
@@ -661,8 +671,8 @@ int phongo_execute_command(mongoc_client_t *client, const char *db, const bson_t
 				ns = bson_iter_utf8(&child, &cursor->nslen);
 				bson_strncpy(cursor->ns, ns, sizeof cursor->ns);
 			} else if (BSON_ITER_IS_KEY(&child, "firstBatch")) {
-				if (BSON_ITER_HOLDS_ARRAY(&child) && bson_iter_recurse(&child, &cid->first_batch_iter)) {
-					cid->in_first_batch = true;
+				if (BSON_ITER_HOLDS_ARRAY(&child) && bson_iter_recurse(&child, &cid->batch_iter)) {
+					cid->in_batch = true;
 				}
 			}
 		}
@@ -922,12 +932,7 @@ bool phongo_stream_socket_check_closed(mongoc_stream_t *stream) /* {{{ */
 	php_phongo_stream_socket *base_stream = (php_phongo_stream_socket *)stream;
 	PHONGO_TSRMLS_FETCH_FROM_CTX(base_stream->tsrm_ls);
 
-	return PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(base_stream->stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL);
-} /* }}} */
-
-mongoc_stream_t* phongo_stream_get_base_stream(mongoc_stream_t *stream) /* {{{ */
-{
-	return (mongoc_stream_t *) stream;
+	return PHP_STREAM_OPTION_RETURN_OK != php_stream_set_option(base_stream->stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL);
 } /* }}} */
 
 ssize_t phongo_stream_poll (mongoc_stream_poll_t *streams, size_t nstreams, int32_t timeout) /* {{{ */
@@ -1191,7 +1196,6 @@ mongoc_stream_t* phongo_stream_initiator(const mongoc_uri_t *uri, const mongoc_h
 	base_stream->vtable.readv = phongo_stream_readv;
 	base_stream->vtable.setsockopt = phongo_stream_setsockopt;
 	base_stream->vtable.check_closed = phongo_stream_socket_check_closed;
-	base_stream->vtable.get_base_stream = phongo_stream_get_base_stream;
 	base_stream->vtable.poll = phongo_stream_poll;
 
 	if (host->family != AF_UNIX) {
@@ -1370,16 +1374,15 @@ void php_phongo_cursor_to_zval(zval *retval, const mongoc_cursor_t *cursor) /* {
 
 	array_init_size(retval, 19);
 
+	if (cursor) {
 		ADD_ASSOC_LONG_EX(retval, "stamp", cursor->stamp);
 
 #define _ADD_BOOL(z, field) ADD_ASSOC_BOOL_EX(z, #field, cursor->field)
 		_ADD_BOOL(retval, is_command);
 		_ADD_BOOL(retval, sent);
 		_ADD_BOOL(retval, done);
-		_ADD_BOOL(retval, failed);
 		_ADD_BOOL(retval, end_of_event);
 		_ADD_BOOL(retval, in_exhaust);
-		_ADD_BOOL(retval, redir_primary);
 		_ADD_BOOL(retval, has_fields);
 #undef _ADD_BOOL
 
@@ -1452,9 +1455,8 @@ void php_phongo_cursor_to_zval(zval *retval, const mongoc_cursor_t *cursor) /* {
 			ADD_ASSOC_ZVAL_EX(retval, "current_doc", zv);
 #endif
 		}
-
+	}
 } /* }}} */
-/* }}} */
 
 
 static mongoc_uri_t *php_phongo_make_uri(const char *uri_string, bson_t *options) /* {{{ */
@@ -1540,6 +1542,7 @@ void php_phongo_populate_default_ssl_ctx(php_stream_context *ctx, zval *driverOp
 				str_efree(ctmp); \
 			} \
 			php_stream_context_set_option(ctx, "ssl", name, &ztmp); \
+			zval_ptr_dtor(&ztmp); \
 		}
 #define SET_BOOL_CTX(name, defaultvalue) \
 		{ \
@@ -1880,7 +1883,8 @@ static mongoc_client_t *php_phongo_make_mongo_client(const mongoc_uri_t *uri, zv
 			char filename[MAXPATHLEN];
 
 #if PHP_VERSION_ID >= 70000
-			if (VCWD_REALPATH(zval_get_string(pem)->val, filename)) {
+			zend_string *s = zval_get_string(pem);
+			if (VCWD_REALPATH(ZSTR_VAL(s), filename)) {
 #else
 			convert_to_string_ex(pem);
 			if (VCWD_REALPATH(Z_STRVAL_PP(pem), filename)) {
@@ -1890,6 +1894,9 @@ static mongoc_client_t *php_phongo_make_mongo_client(const mongoc_uri_t *uri, zv
 				ssl_options.pem_file = filename;
 				mongoc_client_set_ssl_opts(client, &ssl_options);
 			}
+#if PHP_VERSION_ID >= 70000
+			zend_string_release(s);
+#endif
 		}
 	}
 

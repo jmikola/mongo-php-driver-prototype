@@ -5,25 +5,11 @@ PHP_ARG_WITH([mongodb-ssl],
              [auto],
              [no])
 
-PHP_ARG_ENABLE([mongodb-crypto-system-profile],
-               [whether to use system crypto profile],
-               [AC_HELP_STRING([--enable-mongodb-crypto-system-profile],
-                               [MongoDB: Use system crypto profile (OpenSSL only) [default=no]])],
-               [no],
-               [no])
-
 PHP_ARG_WITH([openssl-dir],
              [deprecated option for OpenSSL library path],
              [AC_HELP_STRING([--with-openssl-dir=@<:@DIR@:>@],
                              [MongoDB: OpenSSL library path (deprecated for pkg-config)])],
              [yes],
-             [no])
-
-PHP_ARG_WITH([system-ciphers],
-             [deprecated option for whether to use system crypto profile],
-             AC_HELP_STRING([--enable-system-ciphers],
-                            [MongoDB: whether to use system crypto profile (deprecated for --enable-mongodb-crypto-system-profile) [default=no]]),
-             [no],
              [no])
 
 AS_IF([test "$PHP_MONGODB_SSL" = "openssl" -o "$PHP_MONGODB_SSL" = "auto"],[
@@ -143,6 +129,9 @@ AS_IF([test "$PHP_MONGODB_SSL" = "libressl" -o "$PHP_MONGODB_SSL" = "auto"],[
 ])
 
 AS_IF([test "$PHP_MONGODB_SSL" = "darwin" -o \( "$PHP_MONGODB_SSL" = "auto" -a "$os_darwin" = "yes" \)],[
+  if test "$os_darwin" = "no"; then
+    AC_MSG_ERROR([Darwin SSL is only supported on macOS])
+  fi
   dnl PHP_FRAMEWORKS is only used for SAPI builds, so use MONGODB_SHARED_LIBADD for shared builds
   if test "$ext_shared" = "yes"; then
     MONGODB_SHARED_LIBADD="-framework Security -framework CoreFoundation $MONGODB_SHARED_LIBADD"
@@ -201,6 +190,20 @@ if test "x$have_ASN1_STRING_get0_data" = "xyes"; then
 else
   AC_SUBST(MONGOC_HAVE_ASN1_STRING_GET0_DATA, 0)
 fi
+
+PHP_ARG_ENABLE([mongodb-crypto-system-profile],
+               [whether to use system crypto profile],
+               [AC_HELP_STRING([--enable-mongodb-crypto-system-profile],
+                               [MongoDB: Use system crypto profile (OpenSSL only) [default=no]])],
+               [no],
+               [no])
+
+PHP_ARG_WITH([system-ciphers],
+             [deprecated option for whether to use system crypto profile],
+             AC_HELP_STRING([--enable-system-ciphers],
+                            [MongoDB: whether to use system crypto profile (deprecated for --enable-mongodb-crypto-system-profile) [default=no]]),
+             [no],
+             [no])
 
 dnl Also consider the deprecated --enable-system-ciphers option
 if test "$PHP_MONGODB_CRYPTO_SYSTEM_PROFILE" = "yes" -o "$PHP_SYSTEM_CIPHERS" = "yes"; then

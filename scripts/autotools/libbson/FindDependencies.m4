@@ -52,3 +52,7 @@ AX_PTHREAD([
 ],[
   AC_MSG_ERROR([libbson requires pthreads on non-Windows platforms.])
 ])
+
+# Check for aligned_alloc()
+AC_SUBST(BSON_HAVE_ALIGNED_ALLOC, 0)
+AC_CHECK_FUNC(aligned_alloc, [AC_SUBST(BSON_HAVE_ALIGNED_ALLOC, 1)])
